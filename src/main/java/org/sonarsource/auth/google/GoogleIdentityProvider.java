@@ -87,7 +87,7 @@ public class GoogleIdentityProvider implements OAuth2IdentityProvider {
   @Override
   public Display getDisplay() {
     return Display.builder()
-        .setIconPath("https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png")
+        .setIconPath("https://google-developers.appspot.com/identity/sign-in/g-normal.png")
         .setBackgroundColor("#4285F4")
         .build();
   }
