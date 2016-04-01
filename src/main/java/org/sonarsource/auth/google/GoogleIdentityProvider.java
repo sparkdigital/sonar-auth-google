@@ -57,6 +57,23 @@ public class GoogleIdentityProvider implements OAuth2IdentityProvider {
     ).build();
   }
 
+  private static String getFullUrl(HttpServletRequest request) {
+    StringBuffer fullUrlBuf = request.getRequestURL();
+    if (request.getQueryString() != null) {
+      fullUrlBuf.append('?').append(request.getQueryString());
+    }
+    return fullUrlBuf.toString();
+  }
+
+  private static String getAuthorizationCode(String fullUrl) {
+    AuthorizationCodeResponseUrl authResponse = new AuthorizationCodeResponseUrl(fullUrl);
+    if (authResponse.getError() != null) {
+      String errorDescription = String.format("Failed to authenticate the user. %s", authResponse.getErrorDescription());
+      throw new IllegalStateException(errorDescription);
+    }
+    return authResponse.getCode();
+  }
+
   @Override
   public String getKey() {
     return "google";
@@ -141,22 +158,5 @@ public class GoogleIdentityProvider implements OAuth2IdentityProvider {
     catch (IOException e) {
       throw new IllegalStateException("User verification failed", e);
     }
-  }
-
-  private static String getFullUrl(HttpServletRequest request) {
-    StringBuffer fullUrlBuf = request.getRequestURL();
-    if (request.getQueryString() != null) {
-      fullUrlBuf.append('?').append(request.getQueryString());
-    }
-    return fullUrlBuf.toString();
-  }
-
-  private static String getAuthorizationCode(String fullUrl) {
-    AuthorizationCodeResponseUrl authResponse = new AuthorizationCodeResponseUrl(fullUrl);
-    if (authResponse.getError() != null) {
-      String errorDescription = String.format("Failed to authenticate the user. %s", authResponse.getErrorDescription());
-      throw new IllegalStateException(errorDescription);
-    }
-    return authResponse.getCode();
   }
 }

@@ -47,28 +47,6 @@ public class GoogleSettings {
     this.settings = settings;
   }
 
-  @CheckForNull
-  public String clientId() {
-    return settings.getString(CLIENT_ID);
-  }
-
-  @CheckForNull
-  public String clientSecret() {
-    return settings.getString(CLIENT_SECRET);
-  }
-
-  public String hostedDomain() {
-    return settings.getString(HOSTED_DOMAIN);
-  }
-
-  public boolean isEnabled() {
-    return settings.getBoolean(ENABLED) && clientId() != null && clientSecret() != null;
-  }
-
-  public boolean allowUsersToSignUp() {
-    return settings.getBoolean(ALLOW_USERS_TO_SIGN_UP);
-  }
-
   public static List<PropertyDefinition> definitions() {
     return Arrays.asList(
         PropertyDefinition.builder(ENABLED)
@@ -111,5 +89,27 @@ public class GoogleSettings {
             .index(5)
             .build()
     );
+  }
+
+  @CheckForNull
+  public String clientId() {
+    return settings.getString(CLIENT_ID);
+  }
+
+  @CheckForNull
+  public String clientSecret() {
+    return settings.getString(CLIENT_SECRET);
+  }
+
+  public String hostedDomain() {
+    return settings.getString(HOSTED_DOMAIN);
+  }
+
+  public boolean isEnabled() {
+    return settings.getBoolean(ENABLED) && clientId() != null && clientSecret() != null;
+  }
+
+  public boolean allowUsersToSignUp() {
+    return settings.getBoolean(ALLOW_USERS_TO_SIGN_UP);
   }
 }
