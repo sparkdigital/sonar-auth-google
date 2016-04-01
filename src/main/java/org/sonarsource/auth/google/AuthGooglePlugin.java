@@ -1,5 +1,5 @@
 /*
- * GitHub Authentication for SonarQube
+ * Google Authentication for SonarQube
  * Copyright (C) 2016-2016 SonarSource SA
  * mailto:contact AT sonarsource DOT com
  *
@@ -19,17 +19,17 @@
  */
 package org.sonarsource.auth.google;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.sonar.api.SonarPlugin;
 
 public class AuthGooglePlugin extends SonarPlugin {
   @Override
   public List getExtensions() {
-    List extensions = new ArrayList();
-    extensions.add(GoogleIdentityProvider.class);
-    extensions.add(GoogleSettings.class);
-    extensions.addAll(GoogleSettings.definitions());
-    return extensions;
+    return Arrays.asList(
+        GoogleIdentityProvider.class,
+        GoogleSettings.class,
+        GoogleSettings.definitions()
+    );
   }
 }
