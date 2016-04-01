@@ -1,5 +1,5 @@
 /*
- * GitHub Authentication for SonarQube
+ * Google Authentication for SonarQube
  * Copyright (C) 2016-2016 SonarSource SA
  * mailto:contact AT sonarsource DOT com
  *
@@ -19,37 +19,42 @@
  */
 package org.sonarsource.auth.google;
 
-import com.github.scribejava.apis.GitHubApi;
-import com.github.scribejava.core.builder.ServiceBuilder;
-import com.github.scribejava.core.model.OAuthRequest;
-import com.github.scribejava.core.model.Token;
-import com.github.scribejava.core.model.Verb;
-import com.github.scribejava.core.model.Verifier;
-import com.github.scribejava.core.oauth.OAuthService;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.sonar.api.server.ServerSide;
 import org.sonar.api.server.authentication.Display;
 import org.sonar.api.server.authentication.OAuth2IdentityProvider;
 import org.sonar.api.server.authentication.UserIdentity;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
-import static org.sonarsource.auth.google.GoogleSettings.LOGIN_STRATEGY_PROVIDER_ID;
-import static org.sonarsource.auth.google.GoogleSettings.LOGIN_STRATEGY_UNIQUE;
+import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.oauth2.Oauth2Scopes;
+import com.google.api.services.oauth2.model.Userinfoplus;
 
 @ServerSide
 public class GoogleIdentityProvider implements OAuth2IdentityProvider {
 
-  private static final Logger LOGGER = Loggers.get(GoogleIdentityProvider.class);
-
-  private static final Token EMPTY_TOKEN = null;
+  private final String appId = "sonarqube";
 
   private final GoogleSettings settings;
 
+  private final GoogleAuthorizationCodeFlow authorizationFlow;
+
   public GoogleIdentityProvider(GoogleSettings settings) {
     this.settings = settings;
+    authorizationFlow = new GoogleAuthorizationCodeFlow.Builder(
+        new NetHttpTransport(), JacksonFactory.getDefaultInstance(),
+        settings.clientId(), settings.clientSecret(),
+        Arrays.asList(
+            Oauth2Scopes.USERINFO_EMAIL, Oauth2Scopes.USERINFO_PROFILE)
+    ).build();
   }
 
   @Override
@@ -59,16 +64,15 @@ public class GoogleIdentityProvider implements OAuth2IdentityProvider {
 
   @Override
   public String getName() {
-    return "GitHub";
+    return "Google";
   }
 
   @Override
   public Display getDisplay() {
     return Display.builder()
-      // URL of src/main/resources/static/google.svg at runtime
-      .setIconPath("/static/authgithub/google.svg")
-      .setBackgroundColor("#444444")
-      .build();
+        .setIconPath("https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png")
+        .setBackgroundColor("#4285F4")
+        .build();
   }
 
   @Override
@@ -83,74 +87,76 @@ public class GoogleIdentityProvider implements OAuth2IdentityProvider {
 
   @Override
   public void init(InitContext context) {
-    String state = context.generateCsrfState();
-    OAuthService scribe = prepareScribe(context)
-      .scope("user:email")
-      .state(state)
-      .build();
-    String url = scribe.getAuthorizationUrl(EMPTY_TOKEN);
-    context.redirectTo(url);
+    String authorizationUrl = authorizationFlow
+        .newAuthorizationUrl()
+        .setState(context.generateCsrfState())
+        .setRedirectUri(context.getCallbackUrl())
+        .build();
+
+    context.redirectTo(authorizationUrl);
   }
 
   @Override
   public void callback(CallbackContext context) {
     context.verifyCsrfState();
 
-    HttpServletRequest request = context.getRequest();
-    OAuthService scribe = prepareScribe(context).build();
-    String oAuthVerifier = request.getParameter("code");
-    Token accessToken = scribe.getAccessToken(EMPTY_TOKEN, new Verifier(oAuthVerifier));
+    String requestUrl = getFullUrl(context.getRequest());
+    String authorizationCode = getAuthorizationCode(requestUrl);
+    try {
+      GoogleTokenResponse response = authorizationFlow
+          .newTokenRequest(authorizationCode)
+          .setRedirectUri(context.getCallbackUrl())
+          .execute();
 
-    OAuthRequest userRequest = new OAuthRequest(Verb.GET, "https://api.google.com/user", scribe);
-    scribe.signRequest(accessToken, userRequest);
+      Credential credential = authorizationFlow.createAndStoreCredential(response, null);
 
-    com.github.scribejava.core.model.Response userResponse = userRequest.send();
-    if (!userResponse.isSuccessful()) {
-      throw new IllegalStateException(format("Fail to authenticate the user. Error code is %s, Body of the response is %s",
-        userResponse.getCode(), userResponse.getBody()));
+      Oauth2 googleUserDetailService = new Oauth2.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential)
+          .setApplicationName(appId)
+          .build();
+
+      Userinfoplus userinfo = googleUserDetailService
+          .userinfo()
+          .get()
+          .execute();
+
+      if (settings.hostedDomain() != null && !settings.hostedDomain().equals(userinfo.getHd())) {
+        throw new IllegalStateException("Not allowed Google Apps Hosted Domain");
+      }
+
+      if (!userinfo.isVerifiedEmail()) {
+        throw new IllegalStateException("Access with not verified email");
+      }
+
+      UserIdentity userIdentity = UserIdentity
+          .builder()
+          .setProviderLogin(userinfo.getId())
+          .setLogin(userinfo.getId())
+          .setName(userinfo.getName())
+          .setEmail(userinfo.getEmail())
+          .build();
+
+      context.authenticate(userIdentity);
+      context.redirectToRequestedPage();
     }
-    String userResponseBody = userResponse.getBody();
-    LOGGER.trace("User response received : %s", userResponseBody);
-    GsonUser gsonUser = GsonUser.parse(userResponseBody);
-
-    UserIdentity userIdentity = UserIdentity.builder()
-      .setProviderLogin(gsonUser.getLogin())
-      .setLogin(getLogin(gsonUser))
-      .setName(getName(gsonUser))
-      .setEmail(gsonUser.getEmail())
-      .build();
-    context.authenticate(userIdentity);
-    context.redirectToRequestedPage();
-  }
-
-  private ServiceBuilder prepareScribe(OAuth2IdentityProvider.OAuth2Context context) {
-    if (!isEnabled()) {
-      throw new IllegalStateException("GitHub Authentication is disabled");
-    }
-    return new ServiceBuilder()
-      .provider(GitHubApi.class)
-      .apiKey(settings.clientId())
-      .apiSecret(settings.clientSecret())
-      .callback(context.getCallbackUrl());
-  }
-
-  private String getLogin(GsonUser gsonUser) {
-    String loginStrategy = settings.loginStrategy();
-    if (LOGIN_STRATEGY_UNIQUE.equals(loginStrategy)) {
-      return generateUniqueLogin(gsonUser);
-    } else if (LOGIN_STRATEGY_PROVIDER_ID.equals(loginStrategy)) {
-      return gsonUser.getLogin();
-    } else {
-      throw new IllegalStateException(format("Login strategy not found : %s", loginStrategy));
+    catch (IOException e) {
+      throw new IllegalStateException("User verification failed", e);
     }
   }
 
-  private static String getName(GsonUser gsonUser) {
-    String name = gsonUser.getName();
-    return isNullOrEmpty(name) ? gsonUser.getLogin() : name;
+  private static String getFullUrl(HttpServletRequest request) {
+    StringBuffer fullUrlBuf = request.getRequestURL();
+    if (request.getQueryString() != null) {
+      fullUrlBuf.append('?').append(request.getQueryString());
+    }
+    return fullUrlBuf.toString();
   }
 
-  private String generateUniqueLogin(GsonUser gsonUser) {
-    return gsonUser.getLogin() + "@" + getKey();
+  private static String getAuthorizationCode(String fullUrl) {
+    AuthorizationCodeResponseUrl authResponse = new AuthorizationCodeResponseUrl(fullUrl);
+    if (authResponse.getError() != null) {
+      String errorDescription = String.format("Failed to authenticate the user. %s", authResponse.getErrorDescription());
+      throw new IllegalStateException(errorDescription);
+    }
+    return authResponse.getCode();
   }
 }
