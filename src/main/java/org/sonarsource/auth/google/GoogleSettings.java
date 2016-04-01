@@ -1,5 +1,5 @@
 /*
- * GitHub Authentication for SonarQube
+ * Google Authentication for SonarQube
  * Copyright (C) 2016-2016 SonarSource SA
  * mailto:contact AT sonarsource DOT com
  *
@@ -26,23 +26,17 @@ import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.config.Settings;
 import org.sonar.api.server.ServerSide;
 
-import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.sonar.api.PropertyType.BOOLEAN;
-import static org.sonar.api.PropertyType.SINGLE_SELECT_LIST;
 
 @ServerSide
 public class GoogleSettings {
 
-  public static final String CLIENT_ID = "sonar.auth.google.clientId.secured";
-  public static final String CLIENT_SECRET = "sonar.auth.google.clientSecret.secured";
+  public static final String CLIENT_ID = "sonar.auth.google.clientId";
+  public static final String CLIENT_SECRET = "sonar.auth.google.secret";
+  public static final String HOSTED_DOMAIN = "sonar.auth.google.hd";
   public static final String ENABLED = "sonar.auth.google.enabled";
   public static final String ALLOW_USERS_TO_SIGN_UP = "sonar.auth.google.allowUsersToSignUp";
-
-  public static final String LOGIN_STRATEGY = "sonar.auth.google.loginStrategy";
-  public static final String LOGIN_STRATEGY_UNIQUE = "Unique";
-  public static final String LOGIN_STRATEGY_PROVIDER_ID = "Same as GitHub login";
-  public static final String LOGIN_STRATEGY_DEFAULT_VALUE = LOGIN_STRATEGY_UNIQUE;
 
   public static final String CATEGORY = "google";
   public static final String SUBCATEGORY = "authentication";
@@ -63,64 +57,59 @@ public class GoogleSettings {
     return settings.getString(CLIENT_SECRET);
   }
 
+  public String hostedDomain() {
+    return settings.getString(HOSTED_DOMAIN);
+  }
+
   public boolean isEnabled() {
-    return settings.getBoolean(ENABLED) && clientId() != null && clientSecret() != null && loginStrategy() != null;
+    return settings.getBoolean(ENABLED) && clientId() != null && clientSecret() != null;
   }
 
   public boolean allowUsersToSignUp() {
     return settings.getBoolean(ALLOW_USERS_TO_SIGN_UP);
   }
 
-  public String loginStrategy(){
-    return settings.getString(LOGIN_STRATEGY);
-  }
-
   public static List<PropertyDefinition> definitions() {
     return Arrays.asList(
-      PropertyDefinition.builder(ENABLED)
-        .name("Enabled")
-        .description("Enable GitHub users to login. Value is ignored if client ID and secret are not defined.")
-        .category(CATEGORY)
-        .subCategory(SUBCATEGORY)
-        .type(BOOLEAN)
-        .defaultValue(valueOf(false))
-        .index(1)
-        .build(),
-      PropertyDefinition.builder(CLIENT_ID)
-        .name("Client ID")
-        .description("Client ID provided by GitHub when registering the application.")
-        .category(CATEGORY)
-        .subCategory(SUBCATEGORY)
-        .index(2)
-        .build(),
-      PropertyDefinition.builder(CLIENT_SECRET)
-        .name("Client Secret")
-        .description("Client password provided by GitHub when registering the application.")
-        .category(CATEGORY)
-        .subCategory(SUBCATEGORY)
-        .index(3)
-        .build(),
-      PropertyDefinition.builder(ALLOW_USERS_TO_SIGN_UP)
-        .name("Allow users to sign-up")
-        .description("Allow new users to authenticate. When set to 'false', only existing users will be able to authenticate to the server.")
-        .category(CATEGORY)
-        .subCategory(SUBCATEGORY)
-        .type(BOOLEAN)
-        .defaultValue(valueOf(true))
-        .index(4)
-        .build(),
-      PropertyDefinition.builder(LOGIN_STRATEGY)
-        .name("Login generation strategy")
-        .description(format("When the login strategy is set to '%s', the user's login will be auto-generated the first time so that it is unique. " +
-          "When the login strategy is set to '%s', the user's login will be the GitHub login.",
-          LOGIN_STRATEGY_UNIQUE, LOGIN_STRATEGY_PROVIDER_ID))
-        .category(CATEGORY)
-        .subCategory(SUBCATEGORY)
-        .type(SINGLE_SELECT_LIST)
-        .defaultValue(LOGIN_STRATEGY_DEFAULT_VALUE)
-        .options(LOGIN_STRATEGY_UNIQUE, LOGIN_STRATEGY_PROVIDER_ID)
-        .index(5)
-        .build()
-      );
+        PropertyDefinition.builder(ENABLED)
+            .name("Enabled")
+            .description("Enable Google users to login. Value is ignored if client ID and secret are not defined.")
+            .category(CATEGORY)
+            .subCategory(SUBCATEGORY)
+            .type(BOOLEAN)
+            .defaultValue(valueOf(false))
+            .index(1)
+            .build(),
+        PropertyDefinition.builder(CLIENT_ID)
+            .name("Client ID")
+            .description("Client ID provided by Google when registering the application.")
+            .category(CATEGORY)
+            .subCategory(SUBCATEGORY)
+            .index(2)
+            .build(),
+        PropertyDefinition.builder(CLIENT_SECRET)
+            .name("Client Secret")
+            .description("Client password provided by Google when registering the application.")
+            .category(CATEGORY)
+            .subCategory(SUBCATEGORY)
+            .index(3)
+            .build(),
+        PropertyDefinition.builder(HOSTED_DOMAIN)
+            .name("Hosted domain")
+            .description("Optional Google Apps hosted domain.")
+            .category(CATEGORY)
+            .subCategory(SUBCATEGORY)
+            .index(4)
+            .build(),
+        PropertyDefinition.builder(ALLOW_USERS_TO_SIGN_UP)
+            .name("Allow users to sign-up")
+            .description("Allow new users to authenticate. When set to 'false', only existing users will be able to authenticate to the server.")
+            .category(CATEGORY)
+            .subCategory(SUBCATEGORY)
+            .type(BOOLEAN)
+            .defaultValue(valueOf(true))
+            .index(5)
+            .build()
+    );
   }
 }
