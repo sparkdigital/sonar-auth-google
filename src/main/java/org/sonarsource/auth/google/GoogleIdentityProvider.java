@@ -36,19 +36,19 @@ import org.sonar.api.utils.log.Loggers;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static org.sonarsource.auth.google.GitHubSettings.LOGIN_STRATEGY_PROVIDER_ID;
-import static org.sonarsource.auth.google.GitHubSettings.LOGIN_STRATEGY_UNIQUE;
+import static org.sonarsource.auth.google.GoogleSettings.LOGIN_STRATEGY_PROVIDER_ID;
+import static org.sonarsource.auth.google.GoogleSettings.LOGIN_STRATEGY_UNIQUE;
 
 @ServerSide
-public class GitHubIdentityProvider implements OAuth2IdentityProvider {
+public class GoogleIdentityProvider implements OAuth2IdentityProvider {
 
-  private static final Logger LOGGER = Loggers.get(GitHubIdentityProvider.class);
+  private static final Logger LOGGER = Loggers.get(GoogleIdentityProvider.class);
 
   private static final Token EMPTY_TOKEN = null;
 
-  private final GitHubSettings settings;
+  private final GoogleSettings settings;
 
-  public GitHubIdentityProvider(GitHubSettings settings) {
+  public GoogleIdentityProvider(GoogleSettings settings) {
     this.settings = settings;
   }
 

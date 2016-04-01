@@ -32,7 +32,7 @@ import static org.sonar.api.PropertyType.BOOLEAN;
 import static org.sonar.api.PropertyType.SINGLE_SELECT_LIST;
 
 @ServerSide
-public class GitHubSettings {
+public class GoogleSettings {
 
   public static final String CLIENT_ID = "sonar.auth.google.clientId.secured";
   public static final String CLIENT_SECRET = "sonar.auth.google.clientSecret.secured";
@@ -49,7 +49,7 @@ public class GitHubSettings {
 
   private final Settings settings;
 
-  public GitHubSettings(Settings settings) {
+  public GoogleSettings(Settings settings) {
     this.settings = settings;
   }
 

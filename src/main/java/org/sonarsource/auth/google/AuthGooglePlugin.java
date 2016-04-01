@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.sonar.api.SonarPlugin;
 
-public class AuthGitHubPlugin extends SonarPlugin {
+public class AuthGooglePlugin extends SonarPlugin {
   @Override
   public List getExtensions() {
     List extensions = new ArrayList();
-    extensions.add(GitHubIdentityProvider.class);
-    extensions.add(GitHubSettings.class);
-    extensions.addAll(GitHubSettings.definitions());
+    extensions.add(GoogleIdentityProvider.class);
+    extensions.add(GoogleSettings.class);
+    extensions.addAll(GoogleSettings.definitions());
     return extensions;
   }
 }
