@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.auth.github;
+package org.sonarsource.auth.google;
 
 import com.github.scribejava.apis.GitHubApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
@@ -36,8 +36,8 @@ import org.sonar.api.utils.log.Loggers;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static org.sonarsource.auth.github.GitHubSettings.LOGIN_STRATEGY_PROVIDER_ID;
-import static org.sonarsource.auth.github.GitHubSettings.LOGIN_STRATEGY_UNIQUE;
+import static org.sonarsource.auth.google.GitHubSettings.LOGIN_STRATEGY_PROVIDER_ID;
+import static org.sonarsource.auth.google.GitHubSettings.LOGIN_STRATEGY_UNIQUE;
 
 @ServerSide
 public class GitHubIdentityProvider implements OAuth2IdentityProvider {
@@ -54,7 +54,7 @@ public class GitHubIdentityProvider implements OAuth2IdentityProvider {
 
   @Override
   public String getKey() {
-    return "github";
+    return "google";
   }
 
   @Override
@@ -65,8 +65,8 @@ public class GitHubIdentityProvider implements OAuth2IdentityProvider {
   @Override
   public Display getDisplay() {
     return Display.builder()
-      // URL of src/main/resources/static/github.svg at runtime
-      .setIconPath("/static/authgithub/github.svg")
+      // URL of src/main/resources/static/google.svg at runtime
+      .setIconPath("/static/authgithub/google.svg")
       .setBackgroundColor("#444444")
       .build();
   }
@@ -101,7 +101,7 @@ public class GitHubIdentityProvider implements OAuth2IdentityProvider {
     String oAuthVerifier = request.getParameter("code");
     Token accessToken = scribe.getAccessToken(EMPTY_TOKEN, new Verifier(oAuthVerifier));
 
-    OAuthRequest userRequest = new OAuthRequest(Verb.GET, "https://api.github.com/user", scribe);
+    OAuthRequest userRequest = new OAuthRequest(Verb.GET, "https://api.google.com/user", scribe);
     scribe.signRequest(accessToken, userRequest);
 
     com.github.scribejava.core.model.Response userResponse = userRequest.send();

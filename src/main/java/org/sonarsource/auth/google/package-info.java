@@ -17,19 +17,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.auth.github;
+@ParametersAreNonnullByDefault
+package org.sonarsource.auth.google;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.sonar.api.SonarPlugin;
+import javax.annotation.ParametersAreNonnullByDefault;
 
-public class AuthGitHubPlugin extends SonarPlugin {
-  @Override
-  public List getExtensions() {
-    List extensions = new ArrayList();
-    extensions.add(GitHubIdentityProvider.class);
-    extensions.add(GitHubSettings.class);
-    extensions.addAll(GitHubSettings.definitions());
-    return extensions;
-  }
-}

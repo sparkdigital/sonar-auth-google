@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-package org.sonarsource.auth.github;
+package org.sonarsource.auth.google;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,17 +34,17 @@ import static org.sonar.api.PropertyType.SINGLE_SELECT_LIST;
 @ServerSide
 public class GitHubSettings {
 
-  public static final String CLIENT_ID = "sonar.auth.github.clientId.secured";
-  public static final String CLIENT_SECRET = "sonar.auth.github.clientSecret.secured";
-  public static final String ENABLED = "sonar.auth.github.enabled";
-  public static final String ALLOW_USERS_TO_SIGN_UP = "sonar.auth.github.allowUsersToSignUp";
+  public static final String CLIENT_ID = "sonar.auth.google.clientId.secured";
+  public static final String CLIENT_SECRET = "sonar.auth.google.clientSecret.secured";
+  public static final String ENABLED = "sonar.auth.google.enabled";
+  public static final String ALLOW_USERS_TO_SIGN_UP = "sonar.auth.google.allowUsersToSignUp";
 
-  public static final String LOGIN_STRATEGY = "sonar.auth.github.loginStrategy";
+  public static final String LOGIN_STRATEGY = "sonar.auth.google.loginStrategy";
   public static final String LOGIN_STRATEGY_UNIQUE = "Unique";
   public static final String LOGIN_STRATEGY_PROVIDER_ID = "Same as GitHub login";
   public static final String LOGIN_STRATEGY_DEFAULT_VALUE = LOGIN_STRATEGY_UNIQUE;
 
-  public static final String CATEGORY = "github";
+  public static final String CATEGORY = "google";
   public static final String SUBCATEGORY = "authentication";
 
   private final Settings settings;
