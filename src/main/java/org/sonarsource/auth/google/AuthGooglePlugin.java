@@ -19,17 +19,18 @@
  */
 package org.sonarsource.auth.google;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import org.sonar.api.SonarPlugin;
 
 public class AuthGooglePlugin extends SonarPlugin {
   @Override
+  @SuppressWarnings("unchecked")
   public List getExtensions() {
-    return Arrays.asList(
-        GoogleIdentityProvider.class,
-        GoogleSettings.class,
-        GoogleSettings.definitions()
-    );
+    List extensions = new ArrayList();
+    extensions.add(GoogleIdentityProvider.class);
+    extensions.add(GoogleSettings.class);
+    extensions.addAll(GoogleSettings.definitions());
+    return extensions;
   }
 }
