@@ -1,5 +1,5 @@
 # sonar-auth-google
-Google Authentication for SonarQube
+Google Authentication for SonarQube 5.4
 
 Forked from https://github.com/SonarSource/sonar-auth-github
 
