@@ -6,8 +6,7 @@ Uses Google OAuth2 and Google API (oauth2.info) to sign in users.
 Configuration in sonar.properties:
 
 ```
-sonar.core.serverBaseURL=set https there! SonarQube requires HTTPS in prodi
-uction
+sonar.core.serverBaseURL=set https there! SonarQube requires HTTPS in production
 sonar.auth.google.clientId=Google ClientID
 sonar.auth.google.secret=Google Client Secret
 sonar.auth.google.hd=Optional Hosted Domain
