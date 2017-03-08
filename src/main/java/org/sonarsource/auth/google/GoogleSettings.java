@@ -47,6 +47,15 @@ public class GoogleSettings {
     this.settings = settings;
   }
 
+  private static String toShellCompatible(String name) {
+    return name.replace('.', '_');
+  }
+
+  private static String fromEnv(String key, String value) {
+    key = toShellCompatible(key);
+    return System.getenv(key) != null ? System.getenv(key) : value;
+  }
+
   public static List<PropertyDefinition> definitions() {
     return Arrays.asList(
         PropertyDefinition.builder(ENABLED)
@@ -55,7 +64,7 @@ public class GoogleSettings {
             .category(CATEGORY)
             .subCategory(SUBCATEGORY)
             .type(BOOLEAN)
-            .defaultValue(valueOf(false))
+            .defaultValue(fromEnv(ENABLED, valueOf(false)))
             .index(1)
             .build(),
         PropertyDefinition.builder(CLIENT_ID)
@@ -63,6 +72,7 @@ public class GoogleSettings {
             .description("Client ID provided by Google when registering the application.")
             .category(CATEGORY)
             .subCategory(SUBCATEGORY)
+            .defaultValue(fromEnv(CLIENT_ID, ""))
             .index(2)
             .build(),
         PropertyDefinition.builder(CLIENT_SECRET)
@@ -70,6 +80,7 @@ public class GoogleSettings {
             .description("Client password provided by Google when registering the application.")
             .category(CATEGORY)
             .subCategory(SUBCATEGORY)
+            .defaultValue(fromEnv(CLIENT_SECRET, ""))
             .index(3)
             .build(),
         PropertyDefinition.builder(HOSTED_DOMAIN)
@@ -77,6 +88,7 @@ public class GoogleSettings {
             .description("Optional Google Apps hosted domain.")
             .category(CATEGORY)
             .subCategory(SUBCATEGORY)
+            .defaultValue(fromEnv(HOSTED_DOMAIN, ""))
             .index(4)
             .build(),
         PropertyDefinition.builder(ALLOW_USERS_TO_SIGN_UP)
@@ -85,7 +97,7 @@ public class GoogleSettings {
             .category(CATEGORY)
             .subCategory(SUBCATEGORY)
             .type(BOOLEAN)
-            .defaultValue(valueOf(true))
+            .defaultValue(fromEnv(ALLOW_USERS_TO_SIGN_UP, valueOf(false)))
             .index(5)
             .build()
     );
