@@ -25,9 +25,8 @@ import org.sonar.api.SonarPlugin;
 
 public class AuthGooglePlugin extends SonarPlugin {
   @Override
-  @SuppressWarnings("unchecked")
-  public List getExtensions() {
-    List extensions = new ArrayList();
+  public List<?> getExtensions() {
+    List<Object> extensions = new ArrayList<>();
     extensions.add(GoogleIdentityProvider.class);
     extensions.add(GoogleSettings.class);
     extensions.addAll(GoogleSettings.definitions());
